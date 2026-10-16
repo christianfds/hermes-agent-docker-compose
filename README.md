@@ -31,15 +31,7 @@ The agent is powered by **OpenCode Go** models (`https://opencode.ai/zen/go/v1`)
 sudo mkdir -p /data/container/hermes
 sudo chown -R 1000:1000 /data/container/hermes
 
-# Secrets
-cat > /data/container/hermes/.env <<'EOF'
-OPENCODE_GO_API_KEY=...
-HERMES_DASHBOARD_BASIC_AUTH_USERNAME=admin
-HERMES_DASHBOARD_BASIC_AUTH_PASSWORD=...
-HERMES_DASHBOARD_BASIC_AUTH_SECRET=...   # openssl rand -base64 32
-EOF
-
-# Model + reverse-proxy settings
+# Model + reverse-proxy settings (no secrets)
 cp config.example.yaml /data/container/hermes/config.yaml
 ```
 
@@ -48,8 +40,12 @@ cp config.example.yaml /data/container/hermes/config.yaml
 1. **Stacks → Add stack → Repository**.
 2. Repository URL: `https://github.com/christianfds/hermes-agent-docker-compose`
 3. Reference: `refs/heads/main`, Compose path: `docker-compose.yml`
-4. **Deploy the stack.** No stack environment variables are required — secrets
-   are read from the mounted `/opt/data/.env`.
+4. **Environment variables** — add the values from `.env.example`:
+   - `OPENCODE_GO_API_KEY`
+   - `HERMES_DASHBOARD_BASIC_AUTH_USERNAME`
+   - `HERMES_DASHBOARD_BASIC_AUTH_PASSWORD`
+   - `HERMES_DASHBOARD_BASIC_AUTH_SECRET` (`openssl rand -base64 32`)
+5. **Deploy the stack.**
 
 ## DNS / TLS
 

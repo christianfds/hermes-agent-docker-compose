@@ -4,10 +4,11 @@
 # Reverse-proxied by the existing Traefik (external `traefik` network) to
 # https://hermes.christianfds.dev and powered by OpenCode Go models.
 #
-# Secrets and the seeded config live on the HOST in /data/container/hermes
-# (bind-mounted as /opt/data) and are intentionally NOT in this repository:
-#   /data/container/hermes/.env         -> OPENCODE_GO_API_KEY + dashboard auth
-#   /data/container/hermes/config.yaml  -> model + dashboard proxy settings
+# Secrets are supplied as Portainer stack environment variables (never
+# committed). Hermes state and the seeded config live on the HOST in
+# /data/container/hermes (bind-mounted as /opt/data):
+#   stack env  -> OPENCODE_GO_API_KEY, HERMES_DASHBOARD_BASIC_AUTH_*
+#   config.yaml -> model + dashboard proxy settings (see config.example.yaml)
 #
 # The dashboard (HERMES_DASHBOARD=1) is served on :9119 inside the container
 # and is reached only through Traefik on the `traefik` network — no host port
@@ -24,6 +25,11 @@ services:
       # Run as the host user that owns /data/container/hermes.
       - HERMES_UID=1000
       - HERMES_GID=1000
+      # Secrets come from the Portainer stack's environment variables.
+      - OPENCODE_GO_API_KEY=${OPENCODE_GO_API_KEY}
+      - HERMES_DASHBOARD_BASIC_AUTH_USERNAME=${HERMES_DASHBOARD_BASIC_AUTH_USERNAME}
+      - HERMES_DASHBOARD_BASIC_AUTH_PASSWORD=${HERMES_DASHBOARD_BASIC_AUTH_PASSWORD}
+      - HERMES_DASHBOARD_BASIC_AUTH_SECRET=${HERMES_DASHBOARD_BASIC_AUTH_SECRET}
     volumes:
       - /data/container/hermes:/opt/data
     networks:
