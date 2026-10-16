@@ -1,0 +1,21 @@
+# Hermes Agent config — seeded on the host as /data/container/hermes/config.yaml
+# (mounted at /opt/data/config.yaml inside the container). Hermes deep-merges
+# this over its built-in defaults, so only the overrides need to be here.
+#
+# After first login the web dashboard can edit this file at
+# https://hermes.christianfds.dev -> Config.
+
+model:
+  # OpenCode Go subscription ($10/mo open models). Key lives in .env as
+  # OPENCODE_GO_API_KEY; the built-in provider pins its relay
+  # (https://opencode.ai/zen/go/v1) automatically.
+  provider: opencode-go
+  default: glm-5.3
+
+dashboard:
+  # Public URL the dashboard is reached at (used for secure OAuth/cookie
+  # handling behind the reverse proxy).
+  public_url: "https://hermes.christianfds.dev"
+  # Trust X-Forwarded-* headers only from the dedicated Traefik network.
+  trusted_proxies:
+    - "172.18.0.0/16"

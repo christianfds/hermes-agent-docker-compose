@@ -1,0 +1,42 @@
+# Hermes Agent — https://hermes-agent.nousresearch.com
+#
+# Deployed on the VPS through Portainer as a "Git repository" stack.
+# Reverse-proxied by the existing Traefik (external `traefik` network) to
+# https://hermes.christianfds.dev and powered by OpenCode Go models.
+#
+# Secrets and the seeded config live on the HOST in /data/container/hermes
+# (bind-mounted as /opt/data) and are intentionally NOT in this repository:
+#   /data/container/hermes/.env         -> OPENCODE_GO_API_KEY + dashboard auth
+#   /data/container/hermes/config.yaml  -> model + dashboard proxy settings
+#
+# The dashboard (HERMES_DASHBOARD=1) is served on :9119 inside the container
+# and is reached only through Traefik on the `traefik` network — no host port
+# is published.
+services:
+  hermes:
+    image: nousresearch/hermes-agent:latest
+    container_name: hermes
+    restart: unless-stopped
+    command: ["gateway", "run"]
+    environment:
+      # Bring up the supervised web dashboard alongside the gateway.
+      - HERMES_DASHBOARD=1
+      # Run as the host user that owns /data/container/hermes.
+      - HERMES_UID=1000
+      - HERMES_GID=1000
+    volumes:
+      - /data/container/hermes:/opt/data
+    networks:
+      - traefik
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=traefik
+      - traefik.http.routers.hermes.entrypoints=websecure
+      - traefik.http.routers.hermes.rule=Host(`hermes.christianfds.dev`)
+      - traefik.http.routers.hermes.tls=true
+      - traefik.http.routers.hermes.tls.certresolver=letsencryptresolver
+      - traefik.http.services.hermes.loadbalancer.server.port=9119
+
+networks:
+  traefik:
+    external: true
